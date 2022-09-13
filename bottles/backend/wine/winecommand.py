@@ -66,7 +66,7 @@ class WineEnv:
 
         if self.has(key):
             values = self.__env[key] + sep + values
-        self.add(key, values)
+        self.add(key, values, True)
 
     def has(self, key):
         return key in self.__env
@@ -206,8 +206,6 @@ class WineCommand:
         # Get Runner libraries
         runner_path = ManagerUtils.get_runner_path(config.get("Runner"))
         if arch == "win64":
-            if "FLATPAK_ID" in os.environ:
-                env.add("GST_PLUGIN_SYSTEM_PATH", "/usr/lib/x86_64-linux-gnu/gstreamer-1.0")
             runner_libs = [
                 "lib/wine/x86_64-unix",
                 "lib32/wine/x86_64-unix",
@@ -217,8 +215,6 @@ class WineCommand:
                 "lib64/wine/i386-unix"
             ]
         else:
-            if "FLATPAK_ID" in os.environ:
-                env.add("GST_PLUGIN_SYSTEM_PATH", "/usr/lib/i386-linux-gnu/gstreamer-1.0")
             runner_libs = [
                 "lib/wine/i386-unix",
                 "lib32/wine/i386-unix",
@@ -360,12 +356,10 @@ class WineCommand:
         if env.is_empty("WINEDLLOVERRIDES"):
             env.remove("WINEDLLOVERRIDES")
 
-        # Wine prefix
         if not return_steam_env:
+            # Wine prefix
             env.add("WINEPREFIX", bottle, override=True)
-
-        # Wine arch
-        if not return_steam_env:
+            # Wine arch
             env.add("WINEARCH", arch)
 
         return env.get()["envs"]
